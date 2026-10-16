@@ -3,7 +3,7 @@
 スマートフォンからローカルAIを使うための、Web UIとFastAPI Hostです。
 会話、画像編集、動画、音声、仕事の依頼を、利用者が設定したバックエンドへ接続します。
 
-> 公開準備版：現在はPrivateで確認中です。自作コードのライセンスは権利者の承認待ちです。
+> 自作コードはMIT Licenseで提供します。実験段階の機能と必要な外部依存は以下を確認してください。
 > モデル・ComfyUI・音声サービス・実データは同梱しません。
 
 ## 対応するAI機能
@@ -89,5 +89,10 @@ mock/CPU回帰と実モデル実績は分けます。公開準備の回帰結果
 
 ## 関連資料
 
-[Pitchi-work](https://github.com/pitchipt-dotcom/pitchi-work) · [ライセンス選択待ち](LICENSING.md) ·
+[Pitchi-work](https://github.com/pitchipt-dotcom/pitchi-work) · [MIT License](LICENSE) ·
 [Privacy](PRIVACY.md) · [Contributing](CONTRIBUTING.md) · [第三者依存](THIRD_PARTY_NOTICES.md)
+
+## ライセンス
+
+自作部分は[MIT License](LICENSE)。Copyright (c) 2026 pitchipt-dotcom。
+第三者の依存ライブラリ・モデル・ソフトの条件は別です。[適用範囲](LICENSING.md)を確認してください。

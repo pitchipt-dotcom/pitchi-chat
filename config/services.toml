@@ -1,0 +1,30 @@
+# Public template. Real values belong in ignored services.local.toml.
+# Select it with PITCH_CHAT_SERVICES_CONFIG. A UI URL alone is not an API.
+[services."tts.generate"]
+ui_url = ""
+api_base_url = ""
+enabled = false
+
+[services."image.generate"]
+image_protocol = ""
+# Only set to "comfyui" after verifying the direct ComfyUI origin, not a UI API.
+ui_url = ""
+api_base_url = ""
+enabled = false
+
+[services."video.generate"]
+ui_url = ""
+api_base_url = ""
+enabled = false
+
+[services."book.search"]
+ui_url = ""
+api_base_url = ""
+enabled = false
+timeout_seconds = 20.0
+[services."ptotsearch.search"]
+ui_url = ""
+api_base_url = ""
+enabled = false
+public_retrieval = false
+timeout_seconds = 20

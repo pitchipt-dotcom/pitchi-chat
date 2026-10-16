@@ -1,0 +1,22 @@
+# Copy to ignored cloud.local.toml; disabled until HOST reviews the exact payload.
+enabled = false
+reviewed_public_payloads = []
+reviewed_render_pairs = []
+
+[reasoning_fallback]
+enabled = false
+endpoint = ""
+model = ""
+api_key_env = "PITCH_CHAT_OPENAI_REASONING_KEY"
+timeout_seconds = 30.0
+max_output_tokens = 2048
+reasoning_effort = "low"
+
+[japanese_renderer]
+enabled = false
+endpoint = ""
+model = ""
+api_key_env = "PITCH_CHAT_OPENAI_RENDERER_KEY"
+timeout_seconds = 30.0
+max_output_tokens = 2048
+reasoning_effort = "none"

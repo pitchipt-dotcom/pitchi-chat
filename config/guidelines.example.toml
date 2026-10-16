@@ -1,0 +1,6 @@
+# Explicit CPU-only tool binding. Real paths and reviewed hash are operator-local.
+enabled = false
+source_root = ""
+python_executable = ""
+reviewed_asset_sha256 = ""
+tool_config = ""

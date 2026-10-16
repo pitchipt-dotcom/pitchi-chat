@@ -1,0 +1,47 @@
+[server]
+# Keep loopback binding when using Tailscale Serve.
+host = "127.0.0.1"
+port = 8000
+
+[storage]
+# Relative paths are resolved against the directory containing this file.
+database = "../data/pitch-chat.sqlite3"
+
+[model]
+adapter = "qwen"
+# Set a complete chat-completions URL plus a reviewed HOST-owned process profile.
+endpoint = ""
+name = "qwen-local"
+api_key_env = "PITCH_CHAT_MODEL_API_KEY"
+timeout_seconds = 60.0
+
+# Optional independent 80B selection; requires reviewed profiles.qwen80b.
+# [models.qwen80b]
+# adapter = "qwen"
+# endpoint = ""
+# name = "qwen80b-local"
+# api_key_env = "PITCH_CHAT_QWEN80B_API_KEY"
+# timeout_seconds = 300.0
+
+[chat]
+default_model = "qwen"
+
+[library]
+# Bound evidence sent to the local answer model; never send full OCR.
+evidence_limit = 3
+snippet_chars = 800
+
+[models.bonsai]
+# Complete URL for the same protocol, paired with a HOST-owned bonsai profile.
+adapter = "bonsai"
+endpoint = ""
+name = "bonsai-local"
+api_key_env = "PITCH_CHAT_BONSAI_API_KEY"
+timeout_seconds = 60.0
+
+# Optional local Strata chat; explicit manual HOST-owned startup required.
+# [models.strata]
+# adapter = "strata"
+# endpoint = ""
+# name = "strata-local"
+# timeout_seconds = 300.0

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#173b5e">
+  <meta name="background-color" content="#f3f5f8">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/static/icons/pitch-chat-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/icons/pitch-chat-192.png">
+  <title>Pitch-chat</title>
+  <link rel="stylesheet" href="/static/style.css?v=14">
+  <script src="/static/deletions.js?v=2" defer></script>
+  <script src="/static/resource-memory.js?v=3" defer></script>
+  <script src="/static/chat-images.js?v=7" defer></script>
+  <script src="/static/chat-videos.js?v=5" defer></script>
+  <script src="/static/long-videos.js?v=2" defer></script>
+  <script src="/static/chat.js?v=31" defer></script>
+  <script src="/static/work.js?v=9" defer></script>
+</head>
+<body>
+  <main>
+    <header><h1>Pitch-chat <small>v0.1</small></h1><p id="status" role="status">接続を確認中…</p></header>
+    <nav class="chat-controls" aria-label="会話">
+      <div class="model-picker">
+        <label for="chat-model">モデル</label>
+        <select id="chat-model" disabled><option value="">確認中…</option></select>
+        <p class="model-presence" aria-live="polite"><span id="selected-model-label">モデルを確認中…</span><span id="active-model-label">稼働中: 確認中…</span></p>
+      </div>
+      <button id="new-chat" type="button">＋ 新しい会話</button>
+      <details id="conversation-menu" open>
+        <summary aria-label="会話メニュー">メニュー</summary>
+        <div class="conversation-menu-content">
+          <label for="chat-mode">質問モード</label>
+          <select id="chat-mode"><option value="chat">通常Chat</option><option value="library">蔵書から質問</option><option value="pt_learning">PT学習</option><option value="clinical">臨床相談</option><option value="work">Pitchi-workへ仕事を依頼</option><option value="video">動画を生成・延長</option></select>
+          <label for="conversations">履歴</label>
+          <select id="conversations"><option value="">会話を選択</option></select>
+          <button id="deletion-open" type="button">︙ 履歴・ファイルの削除</button>
+        </div>
+      </details>
+    </nav>
+    <section id="chat-panel" aria-label="会話">
+      <section id="work-controls" hidden aria-label="Work操作">
+        <label>作業先 <select id="work-project"></select></label>
+        <label>操作 <select id="work-operation"><option value="create">新規作成</option><option value="modify">このArtifactを変更</option><option value="repair">このArtifactを診断・修正</option><option value="clone">元を残して別版を作成</option><option value="continue">追加指示・人間回答（子run）</option></select></label>
+        <p id="work-context" role="status">接続を確認中…</p>
+      </section>
+      <section id="chat-video-controls" hidden aria-label="動画生成設定">
+        <label>動画の長さモード<select id="chat-video-length-mode"><option value="short">短尺クリップ（従来）</option><option value="long">長尺動画モード</option></select></label>
+        <label>動画エンジン<select id="chat-video-backend"><option value="ltx-video">LTX-Video（標準）</option><option value="minimax-h3">MiniMax H3（予備）</option></select></label>
+        <label>プロンプト作成<select id="chat-video-prompt-mode"><option value="direct">Direct（LLMなし）</option><option value="strata">Strata</option><option value="qwen35">Qwen3.5-9B-Uncensored</option></select></label>
+        <label>参照画像<select id="chat-video-reference"><option value="">参照なし（T2V）</option></select></label>
+        <p><small>画像添付は下の「画像を添付・編集」から。添付画像・生成画像・動画の最終フレームを選べます。LLMは画像を見ず、指示文だけを整えます。LTXは約3秒、H3は3.75秒です。</small></p>
+        <button id="chat-video-refresh" type="button">動画・参照画像を再確認</button>
+        <button id="chat-video-join" type="button">選択したクリップを表示順で結合</button>
+        <p><small>結合出力は音声なし・24fps・最大180秒。元のクリップは保持します。</small></p>
+        <p id="chat-video-status" role="status"></p>
+      </section>
+      <section id="long-video-controls" hidden aria-label="長尺動画設定">
+        <h3>長尺動画（最初の1本で実測・見積承認）</h3>
+        <label>目標尺<select id="long-video-seconds"><option>15</option><option>30</option><option>60</option><option>90</option><option>120</option><option>180</option></select>秒</label>
+        <label>完成画面比率<select id="long-video-aspect"><option>16:9</option><option>9:16</option></select></label>
+        <p><small>生成モデルと参照画像は上の設定を利用します。9:16は横長の生成映像をHostで中央クロップします。構図が欠ける場合があります。LTX/H3の現在のworkflowは独立したネガティブプロンプト非対応です。</small></p>
+        <label>シーン構成<select id="long-video-planner"><option value="deterministic">自動・決定論的分割（LLMなし）</option><option value="strata">自動・Strata</option><option value="qwen35">自動・Qwen3.5</option><option value="manual">手動JSON</option></select></label>
+        <textarea id="long-video-manual" hidden rows="6" maxlength="16000" placeholder='{"story":"全体","character":"人物","clothing":"服装","background":"背景","style":"画風","camera":"カメラ","scenes":[{"motion_steps":["動き"],"camera":"固定","transition":"continue","reference_policy":"previous"}]}'></textarea>
+        <label>接続方針<select id="long-video-continuity"><option value="continuous">連続性重視</option><option value="scenes">場面転換重視</option></select></label>
+        <label>参照画像から再初期化する間隔<input id="long-video-reset" type="number" min="1" max="16" value="6">クリップ</label>
+        <label>境界<select id="long-video-fade"><option value="0">先頭フレームを補正して結合</option><option value="3">0.125秒クロスフェード</option></select></label>
+        <label>失敗クリップの明示再試行上限<input id="long-video-retries" type="number" min="0" max="2" value="1"></label>
+        <label>生成試行の総上限<input id="long-video-budget" type="number" min="1" max="128" value="96"></label>
+        <label>基準seed<input id="long-video-seed" type="number" min="0" max="2147483647" value="1"></label>
+        <p><small>下の入力欄に共通プロンプト（1200文字まで）を書いて開始してください。Strata/Qwenは画像を見ず、文章の構成のみ担当します。完全な人物同一性・画質は保証できません。一時停止とキャンセルは実行中クリップの完了を待ちます。</small></p>
+        <button id="long-video-start" type="button">長尺動画を開始（最初の1クリップ）</button>
+        <button id="long-video-refresh" type="button">保存済み進捗を再確認</button>
+        <p id="long-video-status" role="status"></p>
+      </section>
+      <section id="messages" aria-label="メッセージ" aria-live="polite"></section>
+      <pre id="strata-preview" hidden aria-live="polite"></pre>
+      <p id="generation-timing" role="status"></p>
+      <p id="error" role="alert"></p>
+      <form id="chat-form" autocomplete="off">
+      <details id="advanced-chat-options">
+        <summary>詳細設定・検索</summary>
+        <section id="pt-options" hidden>
+          <label for="evidence-query">公開用検索語（任意・患者情報を入れない）</label>
+          <input id="evidence-query" type="text" minlength="2" maxlength="120" placeholder="例：脳卒中 歩行">
+          <label><input id="external-retrieval" type="checkbox">この検索語だけを外部PTOTsearchへ送信することを確認しました</label>
+          <p><small>未確認ならlocal蔵書のみ。相談本文・履歴は外部へ送信しません。基本検出は完全匿名化を保証しません。氏名・連絡先等は入力しないでください。</small></p>
+          <p><small>診断・治療判断の代替ではありません。根拠原文と未検証AI推論を分離します。危険兆候・急変は現場の安全評価を優先してください。</small></p>
+        </section>
+        <section id="strata-options" hidden>
+          <label>推論 <select id="strata-reasoning"><option value="none">なし（通常会話）</option><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select></label>
+          <label>Temperature <input id="strata-temperature" type="number" min="0" max="2" step="0.1" value="0.2"></label>
+          <label>出力上限 <input id="strata-max-tokens" type="number" min="128" max="8192" value="4096"></label>
+          <label>思考上限（回答用512トークン以上を残す） <input id="strata-thinking-budget" type="number" min="0" max="4096" value="512"></label>
+          <label><input id="strata-streaming" type="checkbox" checked>ストリーミング表示</label>
+          <p><small>送信時に安全条件を確認し、必要ならStrataを起動します。利用終了後、設定した待機時間（標準10分）で自動停止します。待機中・実行中の要求がある間は停止しません。</small></p>
+        </section>
+      </details>
+      <label class="visually-hidden" for="message">メッセージ</label>
+      <details id="chat-image-controls">
+        <summary>画像を添付・編集</summary>
+        <label>画像添付（PNG / JPEG / WebP、20MiBまで）<input id="chat-image-upload" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        <label>編集対象<select id="chat-image-reference"><option value="">未選択</option></select></label>
+        <img id="chat-image-selected" alt="選択中の編集対象" hidden style="max-width:100%;max-height:200px">
+        <label>送信方法<select id="chat-image-mode"><option value="chat">テキスト会話（画像は送りません）</option><option value="direct">画像編集：Direct</option><option value="strata">画像編集：Strataで指示を最適化</option><option value="qwen35">画像編集：Qwen3.5で指示を最適化</option><option id="chat-image-vision-option" value="vision" disabled>画像について質問（接続を確認中）</option></select></label>
+        <p><small>Strataは画像を見ません。編集指示の文章だけを最適化します。編集対象は元画像・生成画像から選べます。出力は参照画像の比率で最大1024pxです。</small></p>
+        <fieldset id="chat-image-plan" hidden>
+          <legend>実行前の編集指示</legend><textarea id="chat-image-prompt" maxlength="8000" rows="3"></textarea>
+          <button id="chat-image-render" type="button">確認した指示で編集する</button>
+        </fieldset>
+        <p id="chat-image-status" role="status"></p>
+      </details>
+      <textarea id="message" rows="1" maxlength="16000" required placeholder="メッセージを入力してください"></textarea>
+      <button id="send" type="submit" disabled>送信</button>
+      <button id="cancel-generation" type="button" hidden>生成を停止</button>
+      </form>
+    </section>
+    <details class="management-menu" id="management-menu" open>
+      <summary>管理・Tools・評価</summary>
+      <div class="management-content">
+    <details class="resources" id="connection-diagnostics">
+      <summary>接続診断</summary>
+      <p><small>通信状態だけを表示します。会話・根拠・応答本文は記録しません。</small></p>
+      <button id="connection-check" type="button">接続を再確認</button>
+      <pre id="connection-diagnostics-output" aria-live="polite"></pre>
+    </details>
+    <details class="resources" id="resource-panel">
+      <summary>モデル・GPU・jobの状態</summary>
+      <div class="resource-content">
+      <h2>リソース状態</h2>
+      <label>メモリ確認対象 <select id="memory-target"><option value="comfyui">ComfyUI</option><option value="vision">Vision LLM</option><option value="strata">Strata</option></select></label>
+      <label>画像・動画モデル <select id="memory-backend"><option value="sdxl">SDXL</option><option value="flux-klein">FLUX Klein</option><option value="flux-klein-edit">FLUX Klein 画像編集</option><option value="qwen-image">Qwen Image</option><option value="minimax-h3">MiniMax H3</option></select></label>
+      <div class="model-actions"><button id="memory-refresh" type="button">切り替え前のメモリ状態を再確認</button>
+      <button id="memory-release" type="button">GPU解放（稼働モデルを安全停止）</button>
+      <button id="memory-stop" type="button">対象モデルを安全停止</button>
+      <button id="memory-recover" type="button">隔離状態を確認して復旧</button></div>
+      <pre id="memory-status" role="status">メモリ状態の再確認を押してください。</pre>
+      <small>使用中・待機中は停止せず、処理完了を待ちます。swap初期化やOSキャッシュ破棄は行いません。</small>
+      <p id="resource-status" role="status">確認中…</p>
+      <dl>
+        <dt>実行中モデル</dt><dd id="running-model">—</dd>
+        <dt>要求モデル（直近turn）</dt><dd id="requested-model">—</dd>
+        <dt>実使用モデル</dt><dd id="actual-model">—</dd>
+        <dt>fallback理由</dt><dd id="fallback-reason">—</dd>
+        <dt>Cloud / Renderer</dt><dd id="cloud-render-status">未使用</dd>
+        <dt>GPU blocking owner</dt><dd id="gpu-blocking-owner">—</dd>
+        <dt>実行中Tool</dt><dd id="running-tool">—</dd>
+        <dt>待機ジョブ</dt><dd id="waiting-jobs">0</dd>
+        <dt>GPU / VRAM</dt><dd id="gpu-status">確認中…</dd>
+        <dt>永続job</dt><dd id="job-status">確認中…</dd>
+      </dl>
+      <small>HOST所有profileだけを起動停止します。80Bが外部GPU競合で使えないChatはCPUへ切替。生成Toolは安全条件を満たすまで拒否します。cloud実接続は無効です。</small>
+      <button id="strata-preflight" type="button" hidden>Strata起動前のRAM・Swap・VRAMを確認</button>
+      <pre id="strata-preflight-result" hidden></pre>
+      <div class="model-actions"><button id="model-start" type="button" disabled>選択GPUモデルを起動・health確認</button>
+      <button id="model-stop" type="button" disabled>選択GPUモデルを停止</button></div>
+      <small>実モデルにはHOST所有lifecycle profileが必要です。未管理の既存processは停止しません。</small>
+      </div>
+    </details>
+      <details id="conversation-evaluation"><summary>会話の評価・測定記録</summary>
+        <p>会話履歴と評価はこのHOSTに保存します。思考本文は保存しません。</p>
+        <form id="evaluation-form">
+          <label>項目 <select id="evaluation-category"><option value="japanese">日本語の自然さ</option><option value="reasoning">論理推論</option><option value="instructions">指示追従</option><option value="coding">コーディング</option><option value="context">文脈保持</option><option value="speed">応答速度</option></select></label>
+          <label>評価（1〜5） <input id="evaluation-score" type="number" min="1" max="5" value="3" required></label>
+          <label>メモ <textarea id="evaluation-note" maxlength="2000" rows="2"></textarea></label>
+          <button type="submit">評価を保存</button><button id="evaluation-load" type="button">保存済み評価を表示</button>
+        </form><pre id="evaluation-result"></pre>
+      </details>
+    <section class="resources" aria-label="Tool実行">
+      <h2>Tools</h2>
+      <p><small>明示的なTool操作です。会話モデルを呼ばず、Harnessで検証します。生成Toolは安全条件整備まで利用不可です。</small></p>
+      <form id="tool-form">
+        <label for="tool-selector">Tool selector</label>
+        <select id="tool-selector" disabled><option value="">確認中…</option></select>
+        <label for="tool-query" id="tool-query-label">蔵書検索語（会話履歴には保存しません）</label>
+        <textarea id="tool-query" rows="2" maxlength="500" required></textarea>
+        <label for="tool-project" id="tool-project-label" hidden>HOST承認project</label>
+        <select id="tool-project" hidden></select>
+        <button id="tool-run" type="submit" disabled>検索</button>
+      </form>
+      <pre id="tool-output" aria-live="polite"></pre>
+      <div id="tool-artifacts"></div>
+    </section>
+    <section class="resources" aria-label="画像生成">
+      <h2>画像生成</h2>
+      <p><small>画像の意図からプロンプト案を作成します。内容を確認・編集してから画像を生成してください。</small></p>
+      <details>
+        <summary>チャットの動画モードを開く</summary>
+        <form id="video-form">
+          <label for="video-request">動画の内容・動き・音</label>
+          <textarea id="video-request" maxlength="4000" required></textarea>
+          <label for="video-prompt-mode">プロンプトの作り方</label>
+          <select id="video-prompt-mode"><option value="direct">入力プロンプトで直接生成</option><option value="strata">Strataでプロンプト生成</option><option value="qwen35">Qwen3.5でプロンプト生成</option></select>
+          <p>標準LTX／予備MiniMax H3とプロンプト作成LLMをチャット画面で選べます。</p>
+          <button type="submit">チャットの動画モードで確認</button>
+        </form>
+      </details>
+      <form id="image-form">
+        <label for="image-prompt-mode">プロンプトの作り方</label>
+        <select id="image-prompt-mode"><option value="compiler">選択中のChatモデルで画像の意図を確認・編集</option><option value="strata">Strataでプロンプト生成</option><option value="qwen35">Qwen3.5でプロンプト生成</option><option value="direct">入力プロンプトで直接生成</option></select>
+        <label for="image-request">画像の意図</label>
+        <textarea id="image-request" rows="3" maxlength="4000" required></textarea>
+        <label for="image-backend">画像backend</label>
+        <select id="image-backend" disabled></select>
+        <label for="image-aspect">縦横比</label>
+        <select id="image-aspect"><option>1:1</option><option>3:2</option><option>2:3</option><option>16:9</option><option>9:16</option></select>
+        <button id="image-preview" type="button" disabled>プロンプト案を作成</button>
+        <fieldset id="media-editor" hidden>
+          <legend>生成プロンプトの確認・編集</legend>
+          <label for="media-positive">生成する内容</label><textarea id="media-positive" maxlength="8000" rows="6"></textarea>
+          <label for="media-negative">避けるもの</label><textarea id="media-negative" maxlength="4000" rows="3"></textarea>
+          <p id="media-prompt-note">編集を確認して「画像を生成」を押してください。</p>
+        </fieldset>
+        <fieldset id="image-editor" hidden>
+          <legend>プロンプト案の確認・編集</legend>
+          <label for="image-purpose">目的</label><input id="image-purpose" maxlength="300">
+          <label for="image-subject">被写体</label><textarea id="image-subject" maxlength="1200" rows="3"></textarea>
+          <label for="image-style">画風</label><input id="image-style" maxlength="300">
+          <label for="image-composition">構図</label><textarea id="image-composition" maxlength="500" rows="2"></textarea>
+          <label for="image-text">入れる文字</label><input id="image-text" maxlength="500">
+          <label for="image-negative">避けるもの（1行に1項目、8項目まで）</label><textarea id="image-negative" maxlength="2408" rows="3"></textarea>
+        </fieldset>
+        <button id="image-generate" type="submit" disabled>画像を生成</button>
+      </form>
+      <p id="image-status" role="status">backendを確認中…</p>
+      <pre id="image-output" aria-live="polite"></pre>
+      <div id="image-results"></div>
+    </section>
+      </div>
+    </details>
+  </main>
+  <p id="offline-notice" role="alert" hidden>Pitchi-chat HOSTへ接続できません</p>
+<dialog id="deletion-dialog" aria-labelledby="deletion-title">
+    <h2 id="deletion-title">履歴・元ファイルを削除</h2>
+    <p>Host管理のコピーを完全削除します。別サービスの原本・バックアップ・端末のコピーは対象外です。</p>
+    <button id="deletion-close" type="button">閉じる</button>
+    <button id="deletion-refresh" type="button">状態を再確認</button>
+    <button id="deletion-multiple" type="button">複数選択</button>
+    <button id="deletion-selected" type="button" hidden>選択した対象を削除</button>
+    <label>表示する履歴<select id="deletion-filter"><option value="all">すべて</option><option value="conversation">会話</option><option value="image">画像・指示案</option><option value="video">動画</option><option value="audio">音声</option></select></label>
+    <section id="deletion-confirmation" hidden aria-label="削除の最終確認">
+      <pre id="deletion-scope"></pre>
+      <label><input id="deletion-check" type="checkbox">元ファイルも削除すること、対象外のコピーがあることを確認しました</label>
+      <button id="deletion-execute" type="button">完全削除を実行</button>
+      <button id="deletion-cancel" type="button">キャンセル</button>
+    </section>
+    <pre id="deletion-status" role="status" aria-live="polite"></pre>
+    <section id="deletion-retries" aria-label="削除の再試行"></section>
+    <section id="deletion-items" aria-label="削除できる履歴"></section>
+  </dialog>
+</body>
+</html>

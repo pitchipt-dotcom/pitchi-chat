@@ -1,0 +1,18 @@
+[Unit]
+Description=Pitch-chat single-GPU HOST harness
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/pitch-chat
+EnvironmentFile=-%h/pitch-chat/config/host.local.env
+ExecStart=%h/pitch-chat/.venv/bin/python -m backend.app.serve
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=40
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

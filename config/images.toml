@@ -1,0 +1,11 @@
+# Empty by default. Define reviewed files in ignored images.local.toml.
+# Independent of ComfySimpleUI; unknown model families stay unavailable.
+[backends]
+
+# [backends.qwen-image]
+# family = "qwen-image"
+# model = "<reviewed diffusion model filename>"
+# text_encoder = "<reviewed text encoder filename>"
+# vae = "<reviewed VAE filename>"
+# steps = 20
+# guidance = 4.0

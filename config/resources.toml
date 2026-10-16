@@ -1,0 +1,30 @@
+[gpu]
+# Inspect only when opted in; unknown workloads are never declared safe.
+inspect = false
+max_idle_mib = 256
+reserve_mib = 512
+idle_timeout_seconds = 600
+
+# Process profiles belong in an ignored resources.local.toml.
+# [profiles.<logical-name>]
+# argv = ["<absolute-executable>", "<explicit-argument>"]
+# cwd = "<absolute-working-directory>"
+# health_url = "<verified-private-health-url>"
+# required_vram_mib = 0 # reviewed peak budget; required for shared backgrounds
+# External identities ONLY in private local config: no PID/name blanket whitelist.
+# [[external_processes]]
+# name = "<logical-background-name>"
+# pid = 0 # replace after read-only review
+# start_ticks = 0
+# comm = "<exact-proc-comm>"
+# cgroup = "<exact-proc-cgroup>"
+# classification = "EXTERNAL_SHARED" # or EXTERNAL_BLOCKING; never HOST_OWNED
+# max_memory_mib = 0 # replace with a reviewed bounded cap
+
+# Strata profiles additionally require reviewed RAM/Swap limits:
+# required_ram_mib = 43008
+# min_swap_free_mib = 1024
+# runtime_ram_reserve_mib = 5120
+# manual_start = true
+# graceful_only = true
+# No existing service stop commands belong in a model profile.

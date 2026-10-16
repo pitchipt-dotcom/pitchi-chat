@@ -1,0 +1,6 @@
+# Disabled until the Host operator binds reviewed source and a private gateway.
+enabled = false
+source_root = ""
+python_executable = ""
+reviewed_source_sha256 = ""
+gateway_config = ""

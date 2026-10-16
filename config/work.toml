@@ -1,0 +1,12 @@
+# Copy to ignored work.local.toml. Do not bind existing external run/workspace roots.
+enabled = false
+source_root = ""
+python_executable = ""
+reviewed_source_sha256 = ""
+model_profile = ""
+model_endpoint = ""
+model_name = ""
+timeout_seconds = 600.0
+
+[projects]
+# approved-project = "/absolute/path/to/approved/source-project"

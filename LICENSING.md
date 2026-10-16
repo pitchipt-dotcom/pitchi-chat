@@ -1,9 +1,7 @@
-# ライセンスとPublic化の状態
+# ライセンス
 
-確認済みの新規文書・公開準備スクリプトは[MIT License](LICENSE)です。
+本リポジトリの自作部分は[MIT License](LICENSE)です。
 Copyright (c) 2026 pitchipt-dotcom。
 
-**[適用ファイル一覧](LICENSE_SCOPE.md)以外の旧コードは権利確認中です。現在はPrivateを維持しています。**
-自動承認レビューが、複数著作者・無ライセンスの前身コードについての証拠不足を理由にPublic化を拒否しました。
-権利者の確認、または第三者からの再許諾根拠が得られるまで、本体全体をMITと認定しません。
-第三者依存とモデルの条件はTHIRD_PARTY_NOTICES.mdとdocs/MODEL_LICENSES.mdを参照してください。
+[適用範囲](LICENSE_SCOPE.md)と[コードの由来](docs/PROVENANCE.md)を確認してください。
+外部依存とモデルのライセンスは別です。[第三者依存](THIRD_PARTY_NOTICES.md)と[モデル条件](docs/MODEL_LICENSES.md)を参照してください。

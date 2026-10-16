@@ -3,7 +3,7 @@
 スマートフォンからローカルAIを使うための、Web UIとFastAPI Hostです。
 会話、画像編集、動画、音声、仕事の依頼を、利用者が設定したバックエンドへ接続します。
 
-> Privateで権利確認中です。確認済みの新規文書等のみMITを適用し、旧コードのPublic化は保留しています。
+> 自作部分はMIT Licenseです。外部モデル・サービスは別途導入し、それぞれの利用条件に従ってください。
 > モデル・ComfyUI・音声サービス・実データは同梱しません。
 
 ## 対応するAI機能
@@ -94,6 +94,6 @@ mock/CPU回帰と実モデル実績は分けます。公開準備の回帰結果
 
 ## ライセンス
 
-確認済みの新規文書・公開準備スクリプトは[MIT License](LICENSE)。Copyright (c) 2026 pitchipt-dotcom。
-旧コードは権利確認中です。[適用範囲一覧](LICENSE_SCOPE.md)を確認してください。
+自作のプログラム・テスト・文書は[MIT License](LICENSE)。Copyright (c) 2026 pitchipt-dotcom。
+[適用範囲](LICENSE_SCOPE.md)と[コードの由来](docs/PROVENANCE.md)を確認してください。
 第三者の依存ライブラリ・モデル・ソフトの条件は別です。[適用範囲](LICENSING.md)を確認してください。

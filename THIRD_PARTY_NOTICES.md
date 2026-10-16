@@ -1,6 +1,6 @@
 # 第三者依存と由来
 
-MIT適用はLICENSE_SCOPE.mdの確認済み範囲に限ります。以下は依存のmetadata表示です。ライブラリ本体やモデルweightsを同梱しません。
+自作部分はMITです。外部依存は各配布元の条件に従います。以下は依存のmetadata表示です。ライブラリ本体やモデルweightsを同梱しません。
 
 | Package | Version | Upstream license metadata |
 |---|---|---|
